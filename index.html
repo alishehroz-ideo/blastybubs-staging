@@ -17,10 +17,19 @@
         overflow: hidden; background: #0e0e12;
       }
 
-      /* Full-viewport shell. Solid dark = clean loading backdrop + clean letterbox bars. */
+      /* Full-viewport shell. The game's own key art, blurred and darkened, sits behind the
+         loading UI so a player can tell what is loading; #0e0e12 stays underneath as the fallback
+         if the JPG is slow, and it is also what paints the letterbox bars.
+
+         `cover`, never `100% 100%`: cover crops, stretch distorts. The JPG is baked portrait at
+         900x1600 by Tools/bake_loading_bg.py, so on a 9:16 viewport it crops nothing.
+
+         The blur is baked into the JPG, NOT applied here — a full-screen CSS filter is expensive
+         on phones, and this screen renders while the device is downloading tens of megabytes of
+         wasm. */
       #unity-container {
         position: fixed; inset: 0;
-        background: #0e0e12;
+        background: #0e0e12 url('TemplateData/loading-bg.jpg') center / cover no-repeat;
       }
 
       /* Canvas is positioned by JS (letterbox). Must be TRANSPARENT so the backdrop shows
@@ -116,6 +125,8 @@
       // Deliberately fire-and-forget. Nothing below awaits it, so the Unity download is
       // never delayed by this request.
       (function loadTenantIcon() {
+        // STAGING. Must match DefaultBaseUrl in Assets/GameBull/GameBullEndpoints.cs — they are
+        // the same switch, and flipping only one is a silent mismatch.
         var DEFAULT_API_BASE = "https://api.staging.g-b.store";   // staging
         var DEFAULT_GAME_ID  = "blastybubs";
         var FETCH_TIMEOUT_MS = 4000;
