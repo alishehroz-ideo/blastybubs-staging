@@ -26,7 +26,13 @@
 
          The blur is baked into the JPG, NOT applied here — a full-screen CSS filter is expensive
          on phones, and this screen renders while the device is downloading tens of megabytes of
-         wasm. */
+         wasm.
+
+         THIS IMAGE IS TORN DOWN WHEN THE GAME STARTS. See the container.style.background line
+         beside the killEl() calls in createUnityInstance().then() below. This element is the full
+         viewport and the canvas is letterboxed inside it, so this background also paints the
+         LETTERBOX BARS — left set, it keeps a band of blurred art above and below the game for the
+         whole session. Change one half and change the other. */
       #unity-container {
         position: fixed; inset: 0;
         background: #0e0e12 url('TemplateData/loading-bg.jpg') center / cover no-repeat;
@@ -296,6 +302,21 @@
           killEl("#unity-progress-bar-empty");
           killEl("#unity-progress-percent");
           killEl("#unity-loading-bar");
+
+          // The backdrop is a LOADING backdrop, so it comes down with the rest of the loading UI.
+          // #unity-container is the FULL VIEWPORT and the canvas is letterboxed inside it, so that
+          // background is also what paints the LETTERBOX BARS — leaving the image set keeps a band
+          // of blurred key art above and below the game for the whole session, with a visible seam
+          // at the canvas edge. It reads as the game rendering wrong, not as a loading leftover.
+          //
+          // Harmless for as long as that background was a flat colour; not harmless the moment it
+          // became a picture. The matching note is on the #unity-container rule in the CSS above —
+          // the two halves are forty lines and one language apart, which is how this got in.
+          //
+          // #0e0e12 must stay identical to the fallback in that rule and to GROUND in
+          // Tools/bake_loading_bg.py.
+          var container = document.querySelector("#unity-container");
+          if (container) container.style.background = "#0e0e12";
 
           resizeCanvas();
 
